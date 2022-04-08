@@ -1,13 +1,27 @@
 import './App.css';
-import { getAuth, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import { getAuth, GoogleAuthProvider, signInWithPopup, signOut } from "firebase/auth";
 import app from './firebase.init';
+import { useState } from 'react';
 
 // Initialize Firebase Authentication and get a reference to the service
 const auth = getAuth(app);
 
 function App() {
+  const [user, setUser] = useState({})
+  const provider = new GoogleAuthProvider();
+
+  const googleSignOut = () => {
+    signOut(auth)
+      .then(() => {
+        setUser({})
+      })
+      .catch(
+        error => { setUser({}) }
+      )
+  }
+
   const googleAuthorization = () => {
-    const provider = new GoogleAuthProvider();
+
     signInWithPopup(auth, provider)
       .then((result) => {
         // This gives you a Google Access Token. You can use it to access the Google API.
@@ -15,6 +29,8 @@ function App() {
         const token = credential.accessToken;
         // The signed-in user info.
         const user = result.user;
+        console.log(user)
+        setUser(user)
         // ...
       }).catch((error) => {
         // Handle Errors here.
@@ -29,7 +45,13 @@ function App() {
   }
   return (
     <div className='App'>
-      <button onClick={googleAuthorization}>Vibe Check</button>
+      {
+        user.displayName ? <button onClick={googleSignOut}>Sign-OUT</button>
+          :
+          <button onClick={googleAuthorization}>Sign-IN</button>
+      }
+      <h1>Name: {user.displayName}</h1>
+      <img src={user.photoURL} alt="" />
     </div>
   )
 }
